@@ -8,6 +8,8 @@ using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Chess_Challenge.My_Bot;
+using Chess_Challenge.Stockfish;
 using static ChessChallenge.Application.Settings;
 using static ChessChallenge.Application.ConsoleHelper;
 
@@ -19,14 +21,15 @@ namespace ChessChallenge.Application
         {
             Human,
             MyBot,
-            EvilBot
+            EvilBot,
+            Stockfish
         }
 
         // Game state
         readonly Random rng;
         int gameID;
         bool isPlaying;
-        Board board;
+        public Board board;
         public ChessPlayer PlayerWhite { get; private set; }
         public ChessPlayer PlayerBlack {get;private set;}
 
@@ -194,13 +197,13 @@ namespace ChessChallenge.Application
                 boardUI.SetPerspective(PlayerWhite.IsHuman);
                 HumanWasWhiteLastGame = PlayerWhite.IsHuman;
             }
-            else if (PlayerWhite.Bot is MyBot && PlayerBlack.Bot is MyBot)
+            else if (PlayerWhite.Bot is MyBotPVC && PlayerBlack.Bot is MyBotPVC)
             {
                 boardUI.SetPerspective(true);
             }
             else
             {
-                boardUI.SetPerspective(PlayerWhite.Bot is MyBot);
+                boardUI.SetPerspective(PlayerWhite.Bot is MyBotPVC);
             }
         }
 
@@ -209,7 +212,8 @@ namespace ChessChallenge.Application
             return type switch
             {
                 PlayerType.MyBot => new ChessPlayer(new MyBot(), type, GameDurationMilliseconds),
-                PlayerType.EvilBot => new ChessPlayer(new EvilBot(), type, GameDurationMilliseconds),
+                PlayerType.EvilBot => new ChessPlayer(new MyBotNoNull(), type, GameDurationMilliseconds),
+                PlayerType.Stockfish => new ChessPlayer(new StockfishBot(), type, GameDurationMilliseconds),
                 _ => new ChessPlayer(new HumanPlayer(boardUI), type)
             };
         }
